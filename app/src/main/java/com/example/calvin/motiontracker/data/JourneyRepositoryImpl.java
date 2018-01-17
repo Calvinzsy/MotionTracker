@@ -9,34 +9,34 @@ import java.util.List;
 
 public class JourneyRepositoryImpl implements JourneyRepository {
 
-    private final JourneyDatabase journeyDatabase;
+    private final JourneyDao journeyDao;
 
-    public JourneyRepositoryImpl(JourneyDatabase journeyDatabase) {
-        this.journeyDatabase = journeyDatabase;
+    public JourneyRepositoryImpl(JourneyDao journeyDao) {
+        this.journeyDao = journeyDao;
     }
 
     @Override
     public LiveData<List<Journey>> getJourneys() {
-        return journeyDatabase.journeyDao().getJourneys();
+        return journeyDao.getJourneys();
     }
 
     @Override
     public void addJourney(Journey journey) {
-        AddJourneyTask task = new AddJourneyTask(journeyDatabase);
+        AddJourneyTask task = new AddJourneyTask(journeyDao);
         task.execute(journey);
     }
 
     private static class AddJourneyTask extends AsyncTask<Journey, Void, Void> {
 
-        private JourneyDatabase journeyDatabase;
+        private JourneyDao journeyDao;
 
-        AddJourneyTask(JourneyDatabase journeyDatabase) {
-            this.journeyDatabase = journeyDatabase;
+        AddJourneyTask(JourneyDao journeyDao) {
+            this.journeyDao = journeyDao;
         }
 
         @Override
         protected Void doInBackground(Journey... journeys) {
-            journeyDatabase.journeyDao().insertJourney(journeys[0]);
+            journeyDao.insertJourney(journeys[0]);
             return null;
         }
     }

@@ -17,8 +17,13 @@ public class JourneyRepositoryModule {
 
     @AppScope
     @Provides
-    JourneyRepository provideJourneyRepository(Context context) {
-        JourneyDatabase database = Room.databaseBuilder(context, JourneyDatabase.class, DATABASE_NAME).build();
-        return new JourneyRepositoryImpl(database);
+    JourneyDatabase provideJourneyDatabase(Context context) {
+        return Room.databaseBuilder(context, JourneyDatabase.class, DATABASE_NAME).build();
+    }
+
+    @AppScope
+    @Provides
+    JourneyRepository provideJourneyRepository(JourneyDatabase journeyDatabase) {
+        return new JourneyRepositoryImpl(journeyDatabase.journeyDao());
     }
 }
