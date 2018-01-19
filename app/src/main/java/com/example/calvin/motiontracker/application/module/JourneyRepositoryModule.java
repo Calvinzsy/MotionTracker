@@ -15,15 +15,10 @@ public class JourneyRepositoryModule {
 
     private static final String DATABASE_NAME = "journey_db";
 
-    @AppScope
+    @ApplicationScope
     @Provides
-    JourneyDatabase provideJourneyDatabase(Context context) {
-        return Room.databaseBuilder(context, JourneyDatabase.class, DATABASE_NAME).build();
-    }
-
-    @AppScope
-    @Provides
-    JourneyRepository provideJourneyRepository(JourneyDatabase journeyDatabase) {
+    JourneyRepository provideJourneyRepository(Context context) {
+        JourneyDatabase journeyDatabase = Room.databaseBuilder(context, JourneyDatabase.class, DATABASE_NAME).build();
         return new JourneyRepositoryImpl(journeyDatabase.journeyDao());
     }
 }

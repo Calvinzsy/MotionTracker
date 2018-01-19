@@ -2,23 +2,26 @@ package com.example.calvin.motiontracker.application;
 
 import android.app.Application;
 
-import com.example.calvin.motiontracker.application.module.AppComponent;
-import com.example.calvin.motiontracker.application.module.AppModule;
-import com.example.calvin.motiontracker.application.module.DaggerAppComponent;
+import com.example.calvin.motiontracker.application.module.ApplicationComponent;
+import com.example.calvin.motiontracker.application.module.ApplicationModule;
+import com.example.calvin.motiontracker.application.module.DaggerApplicationComponent;
+import com.example.calvin.motiontracker.application.module.JourneyRepositoryModule;
 
 public class JourneyApplication extends Application {
 
-    private AppComponent appComponent;
+    private static ApplicationComponent applicationComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        appComponent = DaggerAppComponent.builder()
-                .appModule(new AppModule(this))
+        applicationComponent = DaggerApplicationComponent.builder()
+                .applicationModule(new ApplicationModule(this))
+                .journeyRepositoryModule(new JourneyRepositoryModule())
                 .build();
+        applicationComponent.inject(this);
     }
 
-    public AppComponent getAppComponent() {
-        return this.appComponent;
+    public static ApplicationComponent getApplicationComponent() {
+        return applicationComponent;
     }
 }
