@@ -13,6 +13,7 @@ import com.example.calvin.motiontracker.R;
 import com.example.calvin.motiontracker.journeydetail.viewmodel.JourneyViewModel;
 import com.example.calvin.motiontracker.model.Journey;
 import com.example.calvin.motiontracker.model.Location;
+import com.example.calvin.motiontracker.util.Utils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -137,15 +138,11 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
         TextView duration = findViewById(R.id.duration);
         TextView length = findViewById(R.id.length);
         TextView speed = findViewById(R.id.speed);
-        startTime.setText(journey.getStartTime().toString());
-        endTime.setText(journey.getEndTime().toString());
-        long timeDifference = calculateTimeDifference(journey.getStartTime(), journey.getEndTime());
+        startTime.setText(Utils.formatDate(new Date(journey.getStartTime())));
+        endTime.setText(Utils.formatDate(new Date(journey.getEndTime())));
+        long timeDifference = (journey.getEndTime() - journey.getStartTime()) / 1000;
         duration.setText(getString(R.string.duration, timeDifference));
         length.setText(getString(R.string.length, (int)journeyLength));
         speed.setText(getString(R.string.speed, (int)journeyLength / timeDifference));
-    }
-
-    private long calculateTimeDifference(Date startDate, Date endDate) {
-        return (endDate.getTime() - startDate.getTime()) / 1000;
     }
 }

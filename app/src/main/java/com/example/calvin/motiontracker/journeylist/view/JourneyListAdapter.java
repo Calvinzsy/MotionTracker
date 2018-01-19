@@ -8,8 +8,10 @@ import android.widget.TextView;
 
 import com.example.calvin.motiontracker.R;
 import com.example.calvin.motiontracker.model.Journey;
+import com.example.calvin.motiontracker.util.Utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.ViewHolder> {
@@ -64,7 +66,7 @@ public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Journey journey = journeys.get(position);
-        String title = journey.getStartTime().toString() + " - " + journey.getEndTime();
+        String title = Utils.formatDate(new Date(journey.getStartTime())) + " - " + Utils.formatDate(new Date(journey.getEndTime()));
         holder.journeyTitle.setText(title);
         listener.setPosition(position);
         holder.itemView.setOnClickListener(listener);

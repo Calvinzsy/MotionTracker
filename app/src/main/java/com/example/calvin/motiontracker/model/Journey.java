@@ -22,29 +22,27 @@ public class Journey implements Parcelable {
     private long id;
 
     @ColumnInfo(name = "start_time")
-    @TypeConverters(DateConverter.class)
-    private Date startTime;
+    private long startTime;
 
     @ColumnInfo(name = "end_time")
-    @TypeConverters(DateConverter.class)
-    private Date endTime;
+    private long endTime;
 
     @TypeConverters(PathConverter.class)
     private List<Location> path = new ArrayList<>();
 
-    public Date getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
 
@@ -76,15 +74,15 @@ public class Journey implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeLong(id);
-        parcel.writeLong(DateConverter.fromDate(startTime));
-        parcel.writeLong(DateConverter.fromDate(endTime));
+        parcel.writeLong(startTime);
+        parcel.writeLong(endTime);
         parcel.writeTypedList(path);
     }
 
     private Journey(Parcel parcel) {
         id = parcel.readLong();
-        startTime = DateConverter.toDate(parcel.readLong());
-        endTime = DateConverter.toDate(parcel.readLong());
+        startTime = parcel.readLong();
+        endTime = parcel.readLong();
         path = new ArrayList<>();
         parcel.readTypedList(path, Location.CREATOR);
     }
