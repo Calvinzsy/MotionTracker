@@ -4,4 +4,8 @@
     <string name="length">Length: %1$d m</string>
     <string name="speed">Speed: %1$d m/s</string>
     <string name="tracking">Tracking: </string>
+    <string name="permission_request_rationale">Gotta need this permission!</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="check_permission_settings">Check permission settings</string>
 </resources>
