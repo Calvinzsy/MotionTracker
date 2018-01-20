@@ -14,17 +14,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The adapter used by journey list.
+ */
 public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.ViewHolder> {
 
+    /**
+     * The list of journeys associated with this adapter.
+     */
     private List<Journey> journeys = new ArrayList<>();
 
+    /**
+     * The listener that gets invoked when a journey is selected from the list.
+     */
     private OnItemSelectedListener onItemSelectedListener;
 
+    /**
+     * The listener that gets invoked when a journey is selected from the list.
+     */
     public interface OnItemSelectedListener {
         void onItemSelected(Journey journey);
     }
 
-    public void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener) {
+    void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener) {
         this.onItemSelectedListener = onItemSelectedListener;
     }
 
@@ -64,7 +76,7 @@ public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.
         return journeys.size();
     }
 
-    public void setJourneys(List<Journey> journeys) {
+    void setJourneys(List<Journey> journeys) {
         this.journeys = journeys;
         notifyDataSetChanged();
     }

@@ -16,40 +16,82 @@ import com.example.calvin.motiontracker.application.JourneyApplication;
 import com.example.calvin.motiontracker.data.JourneyRepository;
 import com.example.calvin.motiontracker.model.Journey;
 import com.example.calvin.motiontracker.model.Location;
+import com.example.calvin.motiontracker.util.Utils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.Calendar;
-
 import javax.inject.Inject;
 
+/**
+ * The journey tracking service that once started, will periodically request and broadcast journey updates.
+ * With each run of the service, a complete journey will be added to {@link JourneyRepository}. In addition to it,
+ * The service also listens to broadcast messages that request for information of current journey.
+ */
 public class JourneyTrackingService extends Service {
 
+    /**
+     * The event used by service to broadcast journey updates.
+     */
     public static final String EVENT_JOURNEY_UPDATED = "journey_updated";
 
+    /**
+     * The event used by service to listen to journey information requests.
+     */
     public static final String EVENT_JOURNEY_UPDATE_REQUEST = "update_journey";
 
+    /**
+     * The key used for passing {@link Journey} in broadcast messages.
+     */
     public static final String KEY_JOURNEY = "journey";
 
+    /**
+     * Regular update interval for current location.
+     */
     private static final long UPDATE_INTERVAL = 10000;
+
+    /**
+     * Fastest update interval for current location.
+     */
     private static final long FASTEST_INTERVAL = 5000;
 
+    /**
+     * {@link JourneyRepository} used for storing journey before service is stopped.
+     */
     @Inject
     JourneyRepository journeyRepository;
 
+    /**
+     * Location client used for requesting location updates.
+     */
     private FusedLocationProviderClient locationClient;
 
+    /**
+     * Location update request.
+     */
     private LocationRequest locationRequest;
 
+    /**
+     * Location update callback.
+     */
     private JourneyLocationCallback journeyLocationCallback;
 
+    /**
+     * Current journey.
+     */
     private Journey journey;
 
+    /**
+     * The {@link BroadcastReceiver} used for listening to journey information request.
+     */
     private BroadcastReceiver journeyUpdateRequestReceiver;
 
+    /**
+     * Custom {@link LocationCallback} that appends the last location in the result to current journey
+     * and notifies it.
+     */
     private class JourneyLocationCallback extends LocationCallback {
 
         public void onLocationResult(LocationResult result) {
@@ -60,6 +102,9 @@ public class JourneyTrackingService extends Service {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate() {
         JourneyApplication.getApplicationComponent().inject(this);
@@ -77,41 +122,52 @@ public class JourneyTrackingService extends Service {
         };
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocalBroadcastManager.getInstance(this).registerReceiver(journeyUpdateRequestReceiver, new IntentFilter(JourneyTrackingService.EVENT_JOURNEY_UPDATE_REQUEST));
             journey = new Journey();
-            journey.setStartTime(getCurrentTime());
+            journey.setStartTime(Utils.getCurrentTime());
             locationClient.requestLocationUpdates(locationRequest, journeyLocationCallback, Looper.myLooper());
         }
         return START_NOT_STICKY;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(journeyUpdateRequestReceiver);
         storeCurrentJourney();
     }
 
+    /**
+     * Store the complete journey into {@link JourneyRepository}.
+     */
     private void storeCurrentJourney() {
         if (journey != null && !journey.getPath().isEmpty()) {
             locationClient.removeLocationUpdates(journeyLocationCallback);
-            journey.setEndTime(getCurrentTime());
+            journey.setEndTime(Utils.getCurrentTime());
             journeyRepository.addJourney(journey);
             journey = null;
         }
     }
 
-    private long getCurrentTime() {
-        return Calendar.getInstance().getTimeInMillis();
-    }
-
+    /**
+     * Broadcast information for current journey.
+     */
     private void notifyJourneyUpdated() {
         Intent intent = new Intent(EVENT_JOURNEY_UPDATED);
         intent.putExtra(KEY_JOURNEY, journey);

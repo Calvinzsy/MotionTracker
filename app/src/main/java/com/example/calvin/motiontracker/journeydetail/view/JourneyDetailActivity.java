@@ -25,16 +25,34 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The activity that shows the detail of a journey.
+ */
 public class JourneyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    /**
+     * The key used for passing journey through intent.
+     */
     public static final String KEY_JOURNEY = "journey";
 
+    /**
+     * The key for saving journey in activity state.
+     */
     private static final String STATE_JOURNEY = "state_journey";
 
+    /**
+     * The journey map view.
+     */
     private MapView mapView;
 
+    /**
+     * The google map associated with the map view.
+     */
     private GoogleMap googleMap;
 
+    /**
+     * The journey to be displayed.
+     */
     private Journey journey;
 
     @Override
@@ -110,22 +128,30 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
         updateJourneyDetail(journey, length);
     }
 
+    /**
+     * Draw the journey on the map. Also returns the length of journey in meters.
+     * @param journey The journey to be drawn on map.
+     * @return Length of the journey.
+     */
     private double updateJourneyMap(Journey journey) {
 
         List<Location> path = journey.getPath();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         List<LatLng> list = new ArrayList<>();
+        //Build up list of coordinates based on journey's path
         for (Location location : path) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             builder.include(latLng);
             list.add(latLng);
         }
+        //Add polyline to map
         PolylineOptions polylineOptions = new PolylineOptions()
                 .addAll(list)
                 .color(ContextCompat.getColor(this, R.color.colorPrimary)).width(12f);
         googleMap.clear();
         googleMap.addPolyline(polylineOptions);
 
+        //Zoom to the bounds which shows the whole polyline when map is completed loaded
         final LatLngBounds bounds = builder.build();
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -137,6 +163,11 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
         return SphericalUtil.computeLength(list);
     }
 
+    /**
+     * Update the relevant fields of journey information including start time, end time, duration, length and speed.
+     * @param journey The journey whose information to be shown.
+     * @param journeyLength The length of journey computed previously.
+     */
     private void updateJourneyDetail(Journey journey, double journeyLength) {
         TextView startTime = findViewById(R.id.startTime);
         TextView endTime = findViewById(R.id.endTime);

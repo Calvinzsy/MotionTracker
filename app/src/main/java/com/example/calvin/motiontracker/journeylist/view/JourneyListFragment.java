@@ -24,13 +24,26 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+/**
+ * This is the fragment for displaying journey list.
+ */
 public class JourneyListFragment extends Fragment {
 
+    /**
+     * The {@link android.arch.lifecycle.ViewModel} used to hold list of journeys.
+     */
     @Inject
     ViewModelProvider.Factory factory;
 
+    /**
+     * Adapter for journey list.
+     */
     private JourneyListAdapter journeyListAdapter;
 
+    /**
+     * Listener to be invoked when a journey is selected. This should be
+     * implemented by the activity that wishes to observe this event.
+     */
     private OnJourneySelectedListener onJourneySelectedListener;
 
     public interface OnJourneySelectedListener {

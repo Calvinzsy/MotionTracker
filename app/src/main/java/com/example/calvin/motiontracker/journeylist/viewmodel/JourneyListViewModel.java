@@ -8,13 +8,22 @@ import com.example.calvin.motiontracker.model.Journey;
 
 import java.util.List;
 
+/**
+ * The {@link ViewModel} for holding and getting journeys from the {@link JourneyRepository}.
+ */
 public class JourneyListViewModel extends ViewModel{
 
+    /**
+     * The {@link JourneyRepository} used by this ViewModel.
+     */
     private JourneyRepository journeyRepository;
 
+    /**
+     * The list of journeys this ViewModel holds.
+     */
     private LiveData<List<Journey>> journeys;
 
-    public JourneyListViewModel(JourneyRepository journeyRepository) {
+    JourneyListViewModel(JourneyRepository journeyRepository) {
         this.journeyRepository = journeyRepository;
     }
 

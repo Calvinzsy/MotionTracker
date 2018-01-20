@@ -28,18 +28,39 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The fragment that shows live journey on a map view.
+ */
 public class JourneyTrackingFragment extends Fragment implements OnMapReadyCallback {
 
+    /**
+     * The journey map.
+     */
     private MapView mapView;
 
+    /**
+     * The {@link BroadcastReceiver} used for listening to journey updates posted from {@link JourneyTrackingService}.
+     */
     private BroadcastReceiver journeyUpdateReceiver;
 
+    /**
+     * The polyline drawn on map.
+     */
     private Polyline polyline;
 
+    /**
+     * The google map associated with the map view.
+     */
     private GoogleMap googleMap;
 
+    /**
+     * Locations of recently updated journey.
+     */
     private List<LatLng> journeyLocations;
 
+    /**
+     * Determines if the map is loaded.
+     */
     private boolean mapReady;
 
     @Override
@@ -48,6 +69,8 @@ public class JourneyTrackingFragment extends Fragment implements OnMapReadyCallb
         journeyUpdateReceiver = new BroadcastReceiver(){
             @Override
             public void onReceive(Context context, Intent intent) {
+                //If we receive a message before the map is loaded, store the result.
+                //Otherwise, update map directly.
                 Journey journey = intent.getParcelableExtra(JourneyTrackingService.KEY_JOURNEY);
                 if (mapReady) {
                     updateCurrentJourney(journey);
@@ -75,6 +98,8 @@ public class JourneyTrackingFragment extends Fragment implements OnMapReadyCallb
     public void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(journeyUpdateReceiver, new IntentFilter(JourneyTrackingService.EVENT_JOURNEY_UPDATED));
+        //Request a instant update when the fragment is started so that we don't have to wait for next broadcast.
+        //This is useful when tracking service has a long interval for posting update.
         requestJourneyUpdate();
     }
 
@@ -132,16 +157,27 @@ public class JourneyTrackingFragment extends Fragment implements OnMapReadyCallb
         });
     }
 
+    /**
+     * Send out broadcast message for instant journey update request.
+     */
     private void requestJourneyUpdate() {
         Intent intent = new Intent(JourneyTrackingService.EVENT_JOURNEY_UPDATE_REQUEST);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
 
+    /**
+     * Update current journey on map.
+     * @param journey The latest journey.
+     */
     private void updateCurrentJourney(Journey journey) {
         storeJourneyLocations(journey);
         updateJourneyMap();
     }
 
+    /**
+     * Store journey locations.
+     * @param journey The journey of which locations to be stored.
+     */
     private void storeJourneyLocations(Journey journey) {
         if (journey != null ) {
             journeyLocations.clear();
@@ -152,6 +188,9 @@ public class JourneyTrackingFragment extends Fragment implements OnMapReadyCallb
         }
     }
 
+    /**
+     * Update map view with the journey and brings the camera to last location of current journey.
+     */
     private void updateJourneyMap() {
         if (!journeyLocations.isEmpty()) {
             polyline.setPoints(journeyLocations);

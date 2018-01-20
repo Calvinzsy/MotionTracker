@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 
 import com.example.calvin.motiontracker.data.JourneyRepository;
 
+/**
+ * The factory used to create {@link JourneyListViewModel} with custom constructor.
+ */
 public class JourneyListViewModelFactory implements ViewModelProvider.Factory {
 
     private JourneyRepository journeyRepository;
