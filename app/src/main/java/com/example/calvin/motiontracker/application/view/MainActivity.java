@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 10000;
 
-    private static final int PERMISSION_SETTINGS_REQUEST = 10001;
-
     private CoordinatorLayout layout;
+
+    private Switch trackingServiceSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +50,19 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
         tabLayout.setupWithViewPager(viewPager);
 
-        Switch trackingServiceSwitch = findViewById(R.id.trackingServiceSwitch);
+        trackingServiceSwitch = findViewById(R.id.trackingServiceSwitch);
         trackingServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    startTrackingService();
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    trackingServiceSwitch.setChecked(false);
+                    requestPermission();
                 }else {
-                    stopTrackingService();
+                    if (isChecked) {
+                        startTrackingService();
+                    } else {
+                        stopTrackingService();
+                    }
                 }
             }
         });
@@ -68,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
         switch (requestCode) {
             case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startTracking();
+                    trackingServiceSwitch.setChecked(true);
                 }else {
                     boolean shouldShowRequestPermissionRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION);
                     if (shouldShowRequestPermissionRationale) {
@@ -80,19 +85,6 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                break;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        switch (requestCode) {
-            case PERMISSION_SETTINGS_REQUEST:
-                startTrackingService();
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
                 break;
         }
     }
@@ -120,14 +112,14 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
     }
 
     private void showApplicationPermissionSettings() {
-        Snackbar snackbar = Snackbar.make(layout, R.string.check_permission_settings, Snackbar.LENGTH_SHORT);
+        Snackbar snackbar = Snackbar.make(layout, R.string.check_permission_settings, Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.ok, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityForResult(intent, PERMISSION_SETTINGS_REQUEST);
+                startActivity(intent);
             }
         });
         snackbar.show();
@@ -141,14 +133,6 @@ public class MainActivity extends AppCompatActivity implements JourneyListFragme
     }
 
     private void startTrackingService() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermission();
-        }else {
-            startTracking();
-        }
-    }
-
-    private void startTracking() {
         Intent service = new Intent(this, JourneyTrackingService.class);
         startService(service);
     }

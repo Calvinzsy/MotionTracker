@@ -2,7 +2,6 @@ package com.example.calvin.motiontracker.model;
 
 import android.arch.persistence.room.TypeConverter;
 
-import com.example.calvin.motiontracker.model.Location;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

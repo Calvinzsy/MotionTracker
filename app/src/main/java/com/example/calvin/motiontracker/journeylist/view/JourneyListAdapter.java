@@ -20,8 +20,6 @@ public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.
 
     private OnItemSelectedListener onItemSelectedListener;
 
-    private JourneyItemOnClickListener listener = new JourneyItemOnClickListener();
-
     public interface OnItemSelectedListener {
         void onItemSelected(Journey journey);
     }
@@ -30,30 +28,21 @@ public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.
         this.onItemSelectedListener = onItemSelectedListener;
     }
 
-    private class JourneyItemOnClickListener implements View.OnClickListener {
-
-        private int position = -1;
-
-        public void setPosition(int position) {
-            this.position = position;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (onItemSelectedListener != null && position >= 0) {
-                Journey journey = journeys.get(position);
-                onItemSelectedListener.onItemSelected(journey);
-            }
-        }
-    }
-
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder{
 
         private TextView journeyTitle;
 
         ViewHolder(View itemView) {
             super(itemView);
             journeyTitle = itemView.findViewById(R.id.journeyTitle);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getLayoutPosition();
+                    Journey journey = journeys.get(position);
+                    onItemSelectedListener.onItemSelected(journey);
+                }
+            });
         }
     }
 
@@ -68,8 +57,6 @@ public class JourneyListAdapter extends RecyclerView.Adapter<JourneyListAdapter.
         Journey journey = journeys.get(position);
         String title = Utils.formatDate(new Date(journey.getStartTime())) + " - " + Utils.formatDate(new Date(journey.getEndTime()));
         holder.journeyTitle.setText(title);
-        listener.setPosition(position);
-        holder.itemView.setOnClickListener(listener);
     }
 
     @Override

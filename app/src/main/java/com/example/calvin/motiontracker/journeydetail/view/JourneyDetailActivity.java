@@ -1,7 +1,5 @@
 package com.example.calvin.motiontracker.journeydetail.view;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +8,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.calvin.motiontracker.R;
-import com.example.calvin.motiontracker.journeydetail.viewmodel.JourneyViewModel;
 import com.example.calvin.motiontracker.model.Journey;
 import com.example.calvin.motiontracker.model.Location;
 import com.example.calvin.motiontracker.util.Utils;
@@ -32,22 +29,26 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
 
     public static final String KEY_JOURNEY = "journey";
 
+    private static final String STATE_JOURNEY = "state_journey";
+
     private MapView mapView;
 
     private GoogleMap googleMap;
+
+    private Journey journey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_journey_detail);
 
-        JourneyViewModel journeyViewModel = ViewModelProviders.of(this).get(JourneyViewModel.class);
-        LiveData<Journey> data = journeyViewModel.getJourney();
-        if (data.getValue() == null) {
+        if (savedInstanceState != null){
+            journey = savedInstanceState.getParcelable(STATE_JOURNEY);
+            savedInstanceState.remove(STATE_JOURNEY);
+        }else {
             Bundle extra = getIntent().getExtras();
             if (extra != null) {
-                Journey journey = extra.getParcelable(KEY_JOURNEY);
-                journeyViewModel.setJourney(journey);
+                journey = extra.getParcelable(KEY_JOURNEY);
             }
         }
 
@@ -72,6 +73,7 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         mapView.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable(STATE_JOURNEY, journey);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -104,14 +106,12 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
         if (this.googleMap == null) {
             this.googleMap = googleMap;
         }
-        JourneyViewModel journeyViewModel = ViewModelProviders.of(this).get(JourneyViewModel.class);
-        Journey journey = journeyViewModel.getJourney().getValue();
         double length = updateJourneyMap(journey);
         updateJourneyDetail(journey, length);
     }
 
     private double updateJourneyMap(Journey journey) {
-        PolylineOptions polylineOptions = new PolylineOptions();
+
         List<Location> path = journey.getPath();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         List<LatLng> list = new ArrayList<>();
@@ -120,15 +120,20 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
             builder.include(latLng);
             list.add(latLng);
         }
-        polylineOptions.addAll(list);
-        polylineOptions.color(ContextCompat.getColor(this, R.color.colorPrimary)).width(12f);
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .addAll(list)
+                .color(ContextCompat.getColor(this, R.color.colorPrimary)).width(12f);
         googleMap.clear();
         googleMap.addPolyline(polylineOptions);
 
-        LatLngBounds bounds = builder.build();
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, getResources().getDimensionPixelSize(R.dimen.map_padding));
-        googleMap.moveCamera(cameraUpdate);
-
+        final LatLngBounds bounds = builder.build();
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, getResources().getDimensionPixelSize(R.dimen.map_padding));
+                googleMap.moveCamera(cameraUpdate);
+            }
+        });
         return SphericalUtil.computeLength(list);
     }
 
@@ -143,6 +148,6 @@ public class JourneyDetailActivity extends AppCompatActivity implements OnMapRea
         long timeDifference = (journey.getEndTime() - journey.getStartTime()) / 1000;
         duration.setText(getString(R.string.duration, timeDifference));
         length.setText(getString(R.string.length, (int)journeyLength));
-        speed.setText(getString(R.string.speed, (int)journeyLength / timeDifference));
+        speed.setText(timeDifference == 0 ? getString(R.string.not_applicable) : getString(R.string.speed, (int)journeyLength / timeDifference));
     }
 }

@@ -20,7 +20,6 @@ import com.example.calvin.motiontracker.journeylist.module.JourneyListModule;
 import com.example.calvin.motiontracker.journeylist.viewmodel.JourneyListViewModel;
 import com.example.calvin.motiontracker.model.Journey;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -66,8 +65,8 @@ public class JourneyListFragment extends Fragment {
                 }
             }
         });
-        JourneyListViewModel journeyListViewModel = ViewModelProviders.of(getActivity(), factory).get(JourneyListViewModel.class);
-        journeyListViewModel.getJourneys().observe(getActivity(), new Observer<List<Journey>>() {
+        JourneyListViewModel journeyListViewModel = ViewModelProviders.of(this, factory).get(JourneyListViewModel.class);
+        journeyListViewModel.getJourneys().observe(this, new Observer<List<Journey>>() {
             @Override
             public void onChanged(@Nullable List<Journey> journeys) {
                 journeyListAdapter.setJourneys(journeys);
